@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Feliz Navidad</title>
+
+<style>
+  body {
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: radial-gradient(circle, #0b132b, #000814);
+  }
+
+  svg {
+    width: 90%;
+    max-width: 900px;
+  }
+
+  path, text {
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 3000;
+    stroke-dashoffset: 3000;
+    animation: dibujarBorrar 22s ease-in-out infinite;
+  }
+
+  .texto {
+    stroke: #fefefe;
+    stroke-width: 2.5;
+    font-size: 54px;
+    font-family: "Segoe UI", cursive;
+  }
+
+  .texto-peq {
+    font-size: 34px;
+  }
+
+  /* ESTRELLA */
+  .estrella {
+    stroke: #ffd166;
+    stroke-width: 3;
+  }
+
+  .estrella-brillo {
+    fill: #ffe066;
+    opacity: 0;
+    filter: blur(14px);
+    animation: brillo 22s ease-in-out infinite;
+  }
+
+  /* COPOS */
+  .copo {
+    stroke: #caf0f8;
+    stroke-width: 3;
+  }
+
+  @keyframes dibujarBorrar {
+    0%   { stroke-dashoffset: 3000; }
+    30%  { stroke-dashoffset: 0; }
+    55%  { stroke-dashoffset: 0; }
+    85%  { stroke-dashoffset: 3000; }
+    100% { stroke-dashoffset: 3000; }
+  }
+
+  @keyframes brillo {
+    0%, 30% { opacity: 0; }
+    30.1%, 55% { opacity: 0.85; }
+    55.1%, 85% { opacity: 0.85; }
+    85.1%,100% { opacity: 0; }
+  }
+</style>
+</head>
+
+<body>
+<svg viewBox="0 0 900 900">
+
+  <!-- COPOS LATERALES -->
+  <path class="copo" d="M100 200 L160 260 M160 200 L100 260 M130 180 L130 280"/>
+  <path class="copo" d="M740 200 L800 260 M800 200 L740 260 M770 180 L770 280"/>
+
+  <!-- TEXTO -->
+  <text class="texto" x="450" y="210" text-anchor="middle">
+    Feliz Navidad BABY..!🎄
+  </text>
+
+  <text class="texto texto-peq" x="450" y="270" text-anchor="middle">
+    Que la luz y la paz llenen tu corazón
+  </text>
+
+  <text class="texto texto-peq" x="450" y="330" text-anchor="middle">
+    Con cariño ✨
+  </text>
+
+  <!-- BRILLO ESTRELLA -->
+  <path class="estrella-brillo" d="
+    M450 480
+    L470 540
+    L530 540
+    L480 580
+    L500 640
+    L450 600
+    L400 640
+    L420 580
+    L370 540
+    L430 540
+    Z
+  "/>
+
+  <!-- ESTRELLA -->
+  <path class="estrella" d="
+    M450 480
+    L470 540
+    L530 540
+    L480 580
+    L500 640
+    L450 600
+    L400 640
+    L420 580
+    L370 540
+    L430 540
+    Z
+  "/>
+
+</svg>
+</body>
+</html>
