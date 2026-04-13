@@ -20,7 +20,6 @@
       justify-content: center;
       align-items: center;
       padding: 16px;
-      transition: background 1s ease;
     }
 
     .regalo {
@@ -31,7 +30,6 @@
       border-radius: 58px 58px 64px 64px;
       box-shadow: 0 25px 45px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 200, 150, 0.2);
       overflow: hidden;
-      transition: all 0.3s ease;
       animation: aparecer 0.8s cubic-bezier(0.2, 0.9, 0.4, 1.1);
     }
 
@@ -47,7 +45,7 @@
       overflow: hidden;
       border-radius: 58px 58px 48px 48px;
       cursor: pointer;
-      transition: all 0.5s ease;
+      transition: background 0.5s ease;
     }
 
     .sol {
@@ -217,50 +215,41 @@
       backdrop-filter: blur(4px);
     }
 
-    /* CARTA CORREGIDA - SIN PARPADEOS */
+    /* CARTA NUEVA - SIN ANIMACIONES CSS QUE CAUSEN PARPADEO */
     .carta {
       margin: 8px 20px 24px;
       background: #fff9ef;
       border-radius: 36px;
-      padding: 16px;
       color: #2c1a2e;
-      transition: all 0.3s ease;
       cursor: pointer;
-      text-align: center;
-      position: relative;
-      z-index: 1;
+      overflow: hidden;
+      transition: all 0.2s ease;
     }
 
-    .carta p {
-      font-size: 15px;
+    .carta-header {
+      padding: 16px;
+      text-align: center;
       font-weight: 500;
+      font-size: 15px;
+      background: #fff9ef;
       pointer-events: none;
     }
 
-    .carta .letra {
-      display: none;
+    .carta-contenido {
+      max-height: 0;
+      padding: 0 16px;
+      overflow: hidden;
       font-style: italic;
-      margin-top: 12px;
       font-size: 14px;
       color: #462b47;
       line-height: 1.5;
       text-align: center;
+      transition: max-height 0.4s ease-out, padding 0.3s ease;
     }
 
-    .carta.abierta .letra {
-      display: block;
-      animation: fadeIn 0.5s ease;
-    }
-
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(-10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+    .carta.abierta .carta-contenido {
+      max-height: 300px;
+      padding: 0 16px 16px 16px;
     }
 
     .firma {
@@ -320,10 +309,10 @@
     <div class="fecha">🌸 22 · Ago · 2002 🌸<br><span style="font-size:9px;">luz registrada</span></div>
   </div>
 
-  <!-- CARTA CORREGIDA -->
+  <!-- CARTA NUEVA - Sin parpadeos garantizado -->
   <div class="carta" id="cartaSecreta">
-    <p>💌 Toca para leer 💌</p>
-    <div class="letra">
+    <div class="carta-header">💌 Toca para leer 💌</div>
+    <div class="carta-contenido">
       ❝ Y aunque las nubes quieran tapar la luna,<br>
       yo te encuentro en cada atardecer,<br>
       porque contigo aprendí que el tiempo no importa,<br>
@@ -342,7 +331,7 @@
 </div>
 
 <script>
-  // MENSAJES REALES (sanitizados para móvil)
+  // MENSAJES REALES
   const mensajesReales = [
     { lado: "left", texto: "Nos vemos baby cuídate mucho que te vaya bien 🥰" },
     { lado: "right", texto: "Hay baby!! Ya llegue!! ☺️" },
@@ -375,7 +364,6 @@
     { lado: "left", texto: "Si si 🤭" }
   ];
 
-  // Función para obtener mensajes aleatorios
   function obtenerMensajesAleatorios(arr, max = 12) {
     const shuffled = [...arr];
     for (let i = shuffled.length - 1; i > 0; i--) {
@@ -466,7 +454,6 @@
       toast.style.fontWeight = "bold";
       toast.style.zIndex = "999";
       toast.style.boxShadow = "0 6px 14px black";
-      toast.style.backdropFilter = "blur(8px)";
       document.body.appendChild(toast);
       setTimeout(() => { toast.remove(); }, 1800);
       
@@ -478,7 +465,7 @@
     });
   });
 
-  // CARTA CORREGIDA - Sin parpadeos
+  // CARTA NUEVA - Sin parpadeos (usando max-height en lugar de display)
   const cartaDiv = document.getElementById("cartaSecreta");
   cartaDiv.addEventListener("click", (e) => {
     e.stopPropagation();
@@ -503,7 +490,6 @@
       saludoInicial.style.padding = "8px 16px";
       saludoInicial.style.borderRadius = "40px";
       saludoInicial.style.fontSize = "12px";
-      saludoInicial.style.backdropFilter = "blur(8px)";
       saludoInicial.style.zIndex = "1000";
       saludoInicial.style.textAlign = "center";
       document.body.appendChild(saludoInicial);
