@@ -1,186 +1,515 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Para mi Baby 🌸</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+  <title>Para mi Baby 🌸</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      user-select: none;
+    }
 
-<style>
-:root {
-  --radius: 40px;
-  --text-sm: clamp(12px, 2.5vw, 14px);
-  --text-md: clamp(14px, 3vw, 16px);
-  --text-lg: clamp(18px, 5vw, 22px);
-}
+    body {
+      min-height: 100vh;
+      background: linear-gradient(145deg, #ffb347 0%, #ff7e5e 40%, #6b2e6e 80%, #0a0f2a 100%);
+      font-family: 'Segoe UI', 'Quicksand', system-ui, -apple-system, 'Helvetica Neue', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+      transition: background 1s ease;
+    }
 
-/* RESET */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  -webkit-tap-highlight-color: transparent;
-}
+    .regalo {
+      max-width: 480px;
+      width: 100%;
+      background: rgba(20, 12, 28, 0.55);
+      backdrop-filter: blur(12px);
+      border-radius: 58px 58px 64px 64px;
+      box-shadow: 0 25px 45px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 200, 150, 0.2);
+      overflow: hidden;
+      transition: all 0.3s ease;
+      animation: aparecer 0.8s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+    }
 
-body {
-  min-height: 100dvh; /* mejor que vh en móviles */
-  background: linear-gradient(145deg, #ffb347, #ff7e5e, #6b2e6e, #0a0f2a);
-  font-family: system-ui, sans-serif;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: clamp(10px, 3vw, 20px);
-  overflow-x: hidden;
-}
+    @keyframes aparecer {
+      0% { opacity: 0; transform: scale(0.96) translateY(20px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
 
-/* CONTENEDOR */
-.regalo {
-  width: 100%;
-  max-width: 480px;
-  background: rgba(20,12,28,0.6);
-  border-radius: var(--radius);
-  overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    .cielo {
+      position: relative;
+      height: 280px;
+      background: radial-gradient(circle at 30% 70%, #ffb56b, #d45c4c, #562c5e);
+      overflow: hidden;
+      border-radius: 58px 58px 48px 48px;
+      cursor: pointer;
+      transition: all 0.5s ease;
+    }
 
-  /* fallback para Safari */
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
+    .sol {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      width: 70px;
+      height: 70px;
+      background: #ffe29a;
+      border-radius: 50%;
+      box-shadow: 0 0 35px #ffbc6e;
+      transition: all 0.6s ease;
+    }
 
-/* CIELO */
-.cielo {
-  height: clamp(180px, 40vh, 280px);
-  position: relative;
-  background: radial-gradient(circle at 30% 70%, #ffb56b, #d45c4c, #562c5e);
-}
+    .luna {
+      position: absolute;
+      top: 30px;
+      left: 25px;
+      width: 52px;
+      height: 52px;
+      background: #fff5dd;
+      border-radius: 50%;
+      box-shadow: 0 0 20px #f5e2b0;
+      opacity: 0;
+      transition: opacity 0.8s ease;
+    }
 
-/* SOL / LUNA */
-.sol, .luna {
-  position: absolute;
-  border-radius: 50%;
-}
+    .luna::after {
+      content: "";
+      position: absolute;
+      background: #d9cba3;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      top: 12px;
+      left: 8px;
+      opacity: 0.5;
+    }
 
-.sol {
-  width: clamp(50px, 15vw, 70px);
-  height: clamp(50px, 15vw, 70px);
-  bottom: 20px;
-  right: 20px;
-  background: #ffe29a;
-}
+    .estrellas {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
 
-.luna {
-  width: clamp(40px, 12vw, 52px);
-  height: clamp(40px, 12vw, 52px);
-  top: 20px;
-  left: 20px;
-  background: #fff5dd;
-  opacity: 0;
-}
+    .estrella {
+      position: absolute;
+      background: white;
+      width: 2px;
+      height: 2px;
+      border-radius: 50%;
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
 
-/* JARDÍN */
-.jardin {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
-  gap: clamp(10px, 3vw, 20px);
-  padding: 16px;
-}
+    .cielo.noche .sol {
+      opacity: 0;
+      transform: scale(0.5);
+    }
+    .cielo.noche .luna {
+      opacity: 1;
+    }
+    .cielo.noche {
+      background: radial-gradient(circle at 30% 40%, #1a1f3a, #0a0a1f);
+    }
 
-.flor-emoji {
-  font-size: clamp(32px, 8vw, 48px);
-}
+    .jardin {
+      padding: 20px 24px 12px 24px;
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      gap: 24px;
+    }
 
-/* CHAT */
-.conversacion {
-  margin: 10px;
-  padding: 10px;
-  max-height: 35vh;
-  overflow-y: auto;
+    .flor {
+      text-align: center;
+      transition: transform 0.2s ease;
+      cursor: pointer;
+    }
 
-  /* scroll suave en iOS */
-  -webkit-overflow-scrolling: touch;
-}
+    .flor:active {
+      transform: scale(1.15);
+    }
 
-.msg {
-  font-size: var(--text-sm);
-  padding: 10px;
-  border-radius: 20px;
-  max-width: 85%;
-}
+    .flor-emoji {
+      font-size: 48px;
+      filter: drop-shadow(0 6px 8px rgba(0,0,0,0.3));
+      transition: all 0.2s;
+    }
 
-/* FECHAS */
-.fecha-corazon {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 10px;
-  padding: 10px;
-}
+    .flor span:last-child {
+      display: block;
+      font-size: 12px;
+      color: #ffe0b5;
+      background: rgba(0,0,0,0.4);
+      border-radius: 60px;
+      padding: 2px 8px;
+      margin-top: 6px;
+    }
 
-.fecha {
-  font-size: var(--text-sm);
-  padding: 6px 10px;
-}
+    .conversacion {
+      background: rgba(0, 0, 0, 0.3);
+      margin: 12px 20px;
+      border-radius: 38px;
+      padding: 14px 12px;
+      max-height: 280px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      -webkit-overflow-scrolling: touch;
+    }
 
-/* CARTA */
-.carta {
-  margin: 10px;
-  padding: 14px;
-  font-size: var(--text-md);
-}
+    .bubble {
+      margin-bottom: 16px;
+    }
 
-.letra {
-  font-size: var(--text-sm);
-}
+    .bubble-left {
+      display: flex;
+      justify-content: flex-start;
+    }
 
-/* FIRMA */
-.firma {
-  font-size: var(--text-sm);
-  padding-bottom: 20px;
-}
+    .bubble-right {
+      display: flex;
+      justify-content: flex-end;
+    }
 
-/* RESPONSIVE EXTRA */
-@media (max-width: 360px) {
-  .msg {
-    font-size: 12px;
-  }
-}
-</style>
+    .msg {
+      max-width: 85%;
+      padding: 10px 15px;
+      border-radius: 28px;
+      font-size: 14px;
+      line-height: 1.4;
+      background: #1e1a2ed9;
+      color: #ffe2cf;
+      backdrop-filter: blur(4px);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      word-wrap: break-word;
+      white-space: normal;
+    }
+
+    .bubble-left .msg {
+      background: #412e4cd9;
+      border-bottom-left-radius: 6px;
+    }
+
+    .bubble-right .msg {
+      background: #b85c38d9;
+      color: #fff0e0;
+      border-bottom-right-radius: 6px;
+    }
+
+    .fecha-corazon {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin: 16px 20px 8px;
+    }
+
+    .fecha {
+      background: #00000055;
+      padding: 6px 10px;
+      border-radius: 60px;
+      font-size: 11px;
+      font-weight: bold;
+      text-align: center;
+      color: #ffddb0;
+      backdrop-filter: blur(4px);
+    }
+
+    /* CARTA CORREGIDA - SIN PARPADEOS */
+    .carta {
+      margin: 8px 20px 24px;
+      background: #fff9ef;
+      border-radius: 36px;
+      padding: 16px;
+      color: #2c1a2e;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .carta p {
+      font-size: 15px;
+      font-weight: 500;
+      pointer-events: none;
+    }
+
+    .carta .letra {
+      display: none;
+      font-style: italic;
+      margin-top: 12px;
+      font-size: 14px;
+      color: #462b47;
+      line-height: 1.5;
+      text-align: center;
+    }
+
+    .carta.abierta .letra {
+      display: block;
+      animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .firma {
+      text-align: center;
+      padding: 8px 0 22px;
+      font-size: 13px;
+      color: #ffe3b3;
+      letter-spacing: 1px;
+    }
+
+    @media (max-width: 480px) {
+      .msg {
+        font-size: 13px;
+      }
+      .flor-emoji {
+        font-size: 42px;
+      }
+      .fecha {
+        font-size: 10px;
+      }
+    }
+  </style>
 </head>
-
 <body>
 <div class="regalo">
-  <div class="cielo">
+  <div class="cielo" id="cieloAnimado">
     <div class="sol"></div>
     <div class="luna"></div>
+    <div class="estrellas" id="estrellasContainer"></div>
   </div>
 
   <div class="jardin">
-    <div class="flor"><div class="flor-emoji">🌻</div></div>
-    <div class="flor"><div class="flor-emoji">🌸</div></div>
-    <div class="flor"><div class="flor-emoji">🌙</div></div>
-    <div class="flor"><div class="flor-emoji">🌹</div></div>
-  </div>
-
-  <div class="conversacion">
-    <div class="msg">Nos vemos baby 🥰</div>
-    <div class="msg">Ya llegué!! 🤭</div>
-  </div>
-
-  <div class="fecha-corazon">
-    <div class="fecha">✨ 1998</div>
-    <div class="fecha">🌙 2022</div>
-    <div class="fecha">🌸 2002</div>
-  </div>
-
-  <div class="carta">
-    💌 Toca para leer
-    <div class="letra">
-      Y aunque las nubes quieran tapar la luna...
+    <div class="flor" data-flor="🌻">
+      <div class="flor-emoji">🌻</div>
+      <span>girasol</span>
+    </div>
+    <div class="flor" data-flor="🌸">
+      <div class="flor-emoji">🌸</div>
+      <span>cerezos</span>
+    </div>
+    <div class="flor" data-flor="🌙✨">
+      <div class="flor-emoji">🌙✨</div>
+      <span>luna tuya</span>
+    </div>
+    <div class="flor" data-flor="🌹">
+      <div class="flor-emoji">🌹</div>
+      <span>baby rosa</span>
     </div>
   </div>
 
+  <div class="conversacion" id="chatContainer"></div>
+
+  <div class="fecha-corazon">
+    <div class="fecha">✨ 24 · Ago · 2022 ✨<br><span style="font-size:9px;">donde empezó</span></div>
+    <div class="fecha">🎂 8 · Ago · 1998 🎂<br><span style="font-size:9px;">tu baby (ese soy yo)</span></div>
+    <div class="fecha">🌙 24 · Sep · 2022 🌙<br><span style="font-size:9px;">mi baby (todo sonrisas)</span></div>
+    <div class="fecha">🌸 22 · Ago · 2002 🌸<br><span style="font-size:9px;">luz registrada</span></div>
+  </div>
+
+  <!-- CARTA CORREGIDA -->
+  <div class="carta" id="cartaSecreta">
+    <p>💌 Toca para leer 💌</p>
+    <div class="letra">
+      ❝ Y aunque las nubes quieran tapar la luna,<br>
+      yo te encuentro en cada atardecer,<br>
+      porque contigo aprendí que el tiempo no importa,<br>
+      solo importa el "buenos días baby" al amanecer. ❞<br><br>
+      🎵 (con el alma de Cancerbero, pero el cariño de Wily & Babysita) 🎵<br><br>
+      <span style="font-size:12px;">〝Siempre vuelvo a tus mensajes,<br>
+      como las flores vuelven a brotar.〞</span>
+    </div>
+  </div>
+  
   <div class="firma">
-    hecho con 💻❤️
+    Eres lo mejor que me ha pasado,<br>
+    de quien escribe con código y mucho cariño 💻❤️<br>
+    <span>꧁༒Wily༒꧂ & 🌸Babysita🌸</span>
   </div>
 </div>
+
+<script>
+  // MENSAJES REALES (sanitizados para móvil)
+  const mensajesReales = [
+    { lado: "left", texto: "Nos vemos baby cuídate mucho que te vaya bien 🥰" },
+    { lado: "right", texto: "Hay baby!! Ya llegue!! ☺️" },
+    { lado: "left", texto: "Yessss" },
+    { lado: "left", texto: "Bienvenido baby ☺️" },
+    { lado: "right", texto: "Michas gracias Baby! 🤭" },
+    { lado: "left", texto: "De nada ☺️" },
+    { lado: "right", texto: "Buenas noches baby girl!! 🥰 Duerme bien!! dulces sueñitos!! 🤭 y tambien con los angelitos 😇🥰" },
+    { lado: "left", texto: "Muchas gracias baby 🥰 igualmente cuídate mucho nos vemos en la mañana baby ☺️😇" },
+    { lado: "left", texto: "Buenos dias Baby me voy a hacer el almuerzo vuelvo en un ratito, ve a desayunar" },
+    { lado: "left", texto: "Baby ya despertaste?" },
+    { lado: "right", texto: "Si baby!!" },
+    { lado: "right", texto: "Baby!! estoy de salida.. Mas lueguito vuelvo!!" },
+    { lado: "left", texto: "Okay, nos vemos cuídate mucho baby!!" },
+    { lado: "right", texto: "Ya volví baby!!" },
+    { lado: "left", texto: "Chaooo baby descansa dulces sueños baby 🥰" },
+    { lado: "right", texto: "Muchas gracias baby!! 🥰" },
+    { lado: "left", texto: "Baby ya llegué a casa 🤭" },
+    { lado: "right", texto: "Bienvenida baby!!! 🥰" },
+    { lado: "left", texto: "Baby!!! Buenas noches!! 🥰" },
+    { lado: "right", texto: "Baby! Buenas noches!" },
+    { lado: "left", texto: "Baby buenas tardes!!! Que tal tu dia?" },
+    { lado: "right", texto: "Hola baby! Hoy sali!" },
+    { lado: "left", texto: "A ya y que tal te fue? Me alegro ☺️" },
+    { lado: "right", texto: "Segura? 🥹" },
+    { lado: "left", texto: "Si, se cortó la llamada pero como estabas mimiendo ya no te llame" },
+    { lado: "right", texto: "🤭 no problem!" },
+    { lado: "left", texto: "A ya, fotitos? 🤭" },
+    { lado: "right", texto: "La próxima voy a ir tomando fotos por donde vaya 😉" },
+    { lado: "left", texto: "Si si 🤭" }
+  ];
+
+  // Función para obtener mensajes aleatorios
+  function obtenerMensajesAleatorios(arr, max = 12) {
+    const shuffled = [...arr];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled.slice(0, max);
+  }
+
+  function cargarChat() {
+    const container = document.getElementById("chatContainer");
+    if (!container) return;
+    
+    const cantidad = Math.floor(Math.random() * 8) + 10;
+    const seleccion = obtenerMensajesAleatorios(mensajesReales, cantidad);
+    
+    container.innerHTML = "";
+    seleccion.forEach(msg => {
+      const bubbleDiv = document.createElement("div");
+      bubbleDiv.className = `bubble ${msg.lado === "left" ? "bubble-left" : "bubble-right"}`;
+      const msgDiv = document.createElement("div");
+      msgDiv.className = "msg";
+      msgDiv.textContent = msg.texto;
+      bubbleDiv.appendChild(msgDiv);
+      container.appendChild(bubbleDiv);
+    });
+    container.scrollTop = container.scrollHeight;
+  }
+
+  // Cielo y estrellas
+  const cielo = document.getElementById("cieloAnimado");
+  const estrellasContainer = document.getElementById("estrellasContainer");
+  let modoNoche = false;
+
+  function crearEstrellas() {
+    estrellasContainer.innerHTML = "";
+    for (let i = 0; i < 70; i++) {
+      const star = document.createElement("div");
+      star.classList.add("estrella");
+      const x = Math.random() * 100;
+      const y = Math.random() * 100;
+      star.style.left = `${x}%`;
+      star.style.top = `${y}%`;
+      star.style.width = `${Math.random() * 2.5 + 1}px`;
+      star.style.height = star.style.width;
+      star.style.opacity = "0";
+      estrellasContainer.appendChild(star);
+    }
+  }
+
+  function activarEstrellas(visible) {
+    const stars = document.querySelectorAll(".estrella");
+    stars.forEach((star, idx) => {
+      setTimeout(() => {
+        star.style.opacity = visible ? (Math.random() * 0.8 + 0.3) : "0";
+      }, idx * 6);
+    });
+  }
+
+  cielo.addEventListener("click", () => {
+    modoNoche = !modoNoche;
+    if (modoNoche) {
+      cielo.classList.add("noche");
+      activarEstrellas(true);
+    } else {
+      cielo.classList.remove("noche");
+      activarEstrellas(false);
+    }
+  });
+
+  // Flores interactivas
+  const flores = document.querySelectorAll(".flor");
+  flores.forEach(flor => {
+    flor.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const tipoFlor = flor.getAttribute("data-flor") || "🌸";
+      const toast = document.createElement("div");
+      toast.textContent = `💖 ${tipoFlor} para ti, babysita 💖`;
+      toast.style.position = "fixed";
+      toast.style.bottom = "20px";
+      toast.style.left = "50%";
+      toast.style.transform = "translateX(-50%)";
+      toast.style.backgroundColor = "#ffdfbf";
+      toast.style.color = "#481e3c";
+      toast.style.padding = "8px 18px";
+      toast.style.borderRadius = "60px";
+      toast.style.fontSize = "14px";
+      toast.style.fontWeight = "bold";
+      toast.style.zIndex = "999";
+      toast.style.boxShadow = "0 6px 14px black";
+      toast.style.backdropFilter = "blur(8px)";
+      document.body.appendChild(toast);
+      setTimeout(() => { toast.remove(); }, 1800);
+      
+      const emojiSpan = flor.querySelector(".flor-emoji");
+      if (emojiSpan) {
+        emojiSpan.style.transform = "scale(1.3)";
+        setTimeout(() => { emojiSpan.style.transform = "scale(1)"; }, 200);
+      }
+    });
+  });
+
+  // CARTA CORREGIDA - Sin parpadeos
+  const cartaDiv = document.getElementById("cartaSecreta");
+  cartaDiv.addEventListener("click", (e) => {
+    e.stopPropagation();
+    cartaDiv.classList.toggle("abierta");
+  });
+
+  // Inicializar
+  crearEstrellas();
+
+  window.addEventListener("load", () => {
+    cargarChat();
+    
+    setTimeout(() => {
+      const saludoInicial = document.createElement("div");
+      saludoInicial.textContent = "✨ Cada vez que recargas, nuevos recuerdos ✨";
+      saludoInicial.style.position = "fixed";
+      saludoInicial.style.bottom = "70px";
+      saludoInicial.style.left = "50%";
+      saludoInicial.style.transform = "translateX(-50%)";
+      saludoInicial.style.backgroundColor = "#000000aa";
+      saludoInicial.style.color = "#ffdaa6";
+      saludoInicial.style.padding = "8px 16px";
+      saludoInicial.style.borderRadius = "40px";
+      saludoInicial.style.fontSize = "12px";
+      saludoInicial.style.backdropFilter = "blur(8px)";
+      saludoInicial.style.zIndex = "1000";
+      saludoInicial.style.textAlign = "center";
+      document.body.appendChild(saludoInicial);
+      setTimeout(() => saludoInicial.remove(), 4000);
+    }, 600);
+  });
+</script>
 </body>
 </html>
