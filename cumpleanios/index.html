@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nuestra Historia</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Playfair+Display:wght@500;600;700&family=Dancing+Script:wght@500;700&display=swap"
+    rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <!-- Cielo con ciclo día/noche automático -->
+  <div class="capa-cielo" id="capa-cielo">
+    <div class="sol-luna"></div>
+    <div class="capa-estrellas" id="capa-estrellas"></div>
+  </div>
+
+  <!-- Fuegos artificiales del final espectacular -->
+  <canvas class="canvas-fuegos" id="canvas-fuegos"></canvas>
+
+  <!-- Fondo con viñeta y luz ambiental -->
+  <div class="escenario">
+    <div class="luz-ambiental"></div>
+
+    <!-- Capas de efectos (se llenan dinámicamente desde script.js) -->
+    <div class="capa-particulas" id="capa-particulas"></div>
+    <div class="capa-petalos" id="capa-petalos"></div>
+    <div class="capa-corazones" id="capa-corazones"></div>
+    <div class="capa-corazones-final" id="capa-corazones-final"></div>
+
+    <!-- Música de fondo -->
+    <audio id="audio-fondo" loop preload="auto">
+      <!-- Coloca tu archivo dentro de la carpeta musica/ y actualiza el nombre aquí -->
+      <source src="music/Mi Casi Favorito.mp3" type="audio/mpeg">
+    </audio>
+    <button id="btn-musica" class="btn-musica" aria-label="Reproducir música" aria-pressed="false">
+      <span class="icono-musica">♪</span>
+    </button>
+
+    <header class="encabezado">
+      <p class="eyebrow">Un regalo, página por página</p>
+      <h1>Nuestra Historia</h1>
+      <p class="contador" id="contador">
+        Juntos desde hace <span id="contador-valores">calculando...</span>
+      </p>
+    </header>
+
+    <!-- ===================== LIBRO ===================== -->
+    <div class="perspectiva" id="perspectiva">
+      <div class="libro-tilt" id="libro-tilt">
+        <div class="libro" id="libro">
+
+          <!-- Tapa trasera fija (base del libro) -->
+          <div class="tapa-fija tapa-trasera"></div>
+
+          <!-- Hoja 1: Portada / Página 1 -->
+          <div class="hoja" data-hoja="0" style="z-index:6;">
+            <div class="cara cara-frente portada">
+              <div class="marco-portada">
+                <span class="adorno">✦</span>
+                <h2 class="titulo-portada">Nuestra<br>Historia</h2>
+                <p class="subtitulo-portada">para ti</p>
+                <span class="adorno">✦</span>
+              </div>
+            </div>
+            <div class="cara cara-dorso pagina" data-num="1">
+              <div class="contenido-pagina">
+                <div class="foto-flip" tabindex="0" role="button" aria-label="Toca la foto para ver el recuerdo">
+                  <div class="foto-flip-interior">
+                    <div class="foto-cara foto-marco">
+                      <div class="foto-placeholder">
+                        <!-- Reemplaza este div por: <img src="fotos/1.jpg" alt=""> -->
+                        <!-- <span>Foto 1</span> -->
+                        <img src="fotos/page1/page1.jpg" alt="">
+                      </div>
+                    </div>
+                    <div class="foto-cara foto-nota">
+                      <p>Aveces vuelvo a tus fotos, como quien vuelve a un lugar. No porque espere encontrarte. Solo
+                        porque cuesta soltar</p>
+                    </div>
+                  </div>
+                </div>
+                <p class="texto-pagina">El día donde todo empezó a tener sentido... No sabía que el destino podía escribirme un mensaje el 7 de septiembre de 2022, y que ese mensaje se llamaría 'Selena'. Al principio solo era curiosidad, pero con el tiempo te convertiste en mi hogar.</p>
+                <button class="sobre-carta" data-carta="0" aria-label="Abrir carta oculta">✉</button>
+                <span class="numero-pagina">1</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Hoja 2: Página 2 / Página 3 -->
+          <div class="hoja" data-hoja="1" style="z-index:5;">
+            <div class="cara cara-frente pagina" data-num="2">
+              <div class="contenido-pagina">
+                <div class="foto-flip" tabindex="0" role="button" aria-label="Toca la foto para ver el recuerdo">
+                  <div class="foto-flip-interior">
+                    <div class="foto-cara foto-marco">
+                      <div class="foto-placeholder">
+                        <img src="fotos/page2/page2.jpg" alt="">
+                      </div>
+                    </div>
+                    <div class="foto-cara foto-nota">
+                      <p>Hay canciones que me hablan de todo lo que no fue, y me dejan preguntandome si alguna vez lo
+                        pensaste tambien, porque algunas despedidas llegan antes de empezar</p>
+                    </div>
+                  </div>
+                </div>
+                <p class="texto-pagina">Viajaste hasta aquí, peleaste con tu mamá, me mentiste, todo solo por verme. Caminamos, reímos y por un instante sentí que el mundo era solo nuestro. Ese día entendí que no hay distancia que pueda con el corazón.</p>
+                <button class="sobre-carta" data-carta="1" aria-label="Abrir carta oculta">✉</button>
+                <span class="numero-pagina">2</span>
+              </div>
+            </div>
+            <div class="cara cara-dorso pagina" data-num="3">
+              <div class="contenido-pagina">
+                <div class="foto-flip" tabindex="0" role="button" aria-label="Toca la foto para ver el recuerdo">
+                  <div class="foto-flip-interior">
+                    <div class="foto-cara foto-marco">
+                      <div class="foto-placeholder">
+                        <img src="fotos/page3/page3.jpg" alt="">
+                      </div>
+                    </div>
+                    <div class="foto-cara foto-nota">
+                      <p>Fuiste un casi, un que habría pasado, dos corazones tan cerca, pero en distinto lado, y aunque
+                        nunca fuiste mía, hay algo que no entendí, ¿Como es que se extraña tanto algo que nunca vivi?
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <p class="texto-pagina">Madrugaba a las 3:00 AM solo para escucharte mientras trabajabas. Hablábamos de todo, de la vida, del futuro, de nosotros. Me prometiste que si en 3 años no encontrábamos a nadie, viviríamos juntos. Yo aún guardo esa promesa.</p>
+                <button class="sobre-carta" data-carta="2" aria-label="Abrir carta oculta">✉</button>
+                <span class="numero-pagina">3</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Hoja 3: Página 4 / Página final -->
+          <div class="hoja" data-hoja="2" style="z-index:4;">
+            <div class="cara cara-frente pagina" data-num="4">
+              <div class="contenido-pagina">
+                <div class="foto-flip" tabindex="0" role="button" aria-label="Toca la foto para ver el recuerdo">
+                  <div class="foto-flip-interior">
+                    <div class="foto-cara foto-marco">
+                      <div class="foto-placeholder">
+                        <img src="fotos/page4/page4.jpg" alt="">
+                      </div>
+                    </div>
+                    <div class="foto-cara foto-nota">
+                      <p>Tal vez el problema fue imaginar demasiado. Construir un castillo sobre algo tan callado pero no elijo lo que siento ni a quien recordar</p>
+                    </div>
+                  </div>
+                </div>
+                <p class="texto-pagina">El 1 de octubre de 2025 me di cuenta de que te amaba. No como a una amiga. Te amaba como al alma que me completa. Y aunque el mundo nos puso una barrera, yo siempre quise estar a tu lado, sin importar nada más.</p>
+                <button class="boton-video" id="boton-video">🎬 Ver nuestro video</button>
+                <button class="sobre-carta" data-carta="3" aria-label="Abrir carta oculta">✉</button>
+                <span class="numero-pagina">4</span>
+              </div>
+            </div>
+            <div class="cara cara-dorso pagina-final">
+              <div class="contenido-final">
+                <span class="adorno">✦</span>
+                <h2>Feliz Cumpleaños</h2>
+                <p>Escribe aquí tu mensaje final, el más importante de todos.</p>
+                <span class="firma">con todo mi cariño</span>
+                <button class="sobre-carta sobre-carta-final" data-carta="4" aria-label="Abrir carta oculta">✉</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <div class="brillo-libro" id="brillo-libro"></div>
+
+      <!-- Marcador del libro: cinta con pestañas para saltar directo a cada sección -->
+      <nav class="marcador" id="marcador" aria-label="Ir directo a una página">
+        <button class="pestana" data-ir="0" title="Portada"><span>❖</span></button>
+        <button class="pestana" data-ir="1" title="Página 1"><span>1</span></button>
+        <button class="pestana" data-ir="2" title="Páginas 2-3"><span>2-3</span></button>
+        <button class="pestana" data-ir="3" title="Página 4"><span>4</span></button>
+        <button class="pestana" data-ir="4" title="Página final"><span>♥</span></button>
+      </nav>
+    </div>
+    <!-- =================== FIN LIBRO =================== -->
+
+    <div class="controles">
+      <button id="btn-prev" class="btn-control" aria-label="Página anterior">&#10094;</button>
+      <span class="indicador" id="indicador">Portada cerrada</span>
+      <button id="btn-next" class="btn-control" aria-label="Página siguiente">&#10095;</button>
+    </div>
+
+    <p class="pista">Toca el libro o usa las flechas para pasar las hojas</p>
+
+    <!-- Modal reutilizable para cartas ocultas y video -->
+    <div class="modal-fondo" id="modal-fondo">
+      <div class="modal-caja" id="modal-caja" role="dialog" aria-modal="true">
+        <button class="modal-cerrar" id="modal-cerrar" aria-label="Cerrar">✕</button>
+        <div class="modal-contenido" id="modal-contenido"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+
+</html>

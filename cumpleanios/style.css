@@ -1,0 +1,773 @@
+/* ============================================
+   TOKENS
+   ============================================ */
+:root{
+  --cuero-oscuro:#3b2417;
+  --cuero-medio:#5c3a22;
+  --cuero-claro:#7a4d2a;
+  --oro:#c9a24b;
+  --oro-suave:#e4c878;
+  --vino:#7c2d3b;
+  --marfil:#fbf6ec;
+  --marfil-sombra:#ecdfc4;
+  --carbon:#2b2119;
+  --noche:#120d0a;
+
+  --display: 'Playfair Display', serif;
+  --cuerpo: 'Cormorant Garamond', serif;
+  --firma: 'Dancing Script', cursive;
+}
+
+*{ box-sizing:border-box; }
+
+html,body{
+  margin:0;
+  min-height:100%;
+  background:var(--noche);
+  color:var(--marfil);
+  font-family:var(--cuerpo);
+  overflow-x:hidden;
+}
+
+/* ============================================
+   ESCENARIO
+   ============================================ */
+.escenario{
+  position:relative;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-start;
+  padding:6vh 16px 8vh;
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 8%, rgba(228,200,120,0.10), transparent 60%),
+    radial-gradient(ellipse 120% 80% at 50% 100%, #241a12 0%, var(--noche) 60%);
+}
+
+.luz-ambiental{
+  position:absolute;
+  top:-10%;
+  left:50%;
+  transform:translateX(-50%);
+  width:900px;
+  max-width:140vw;
+  height:500px;
+  background:radial-gradient(ellipse at center, rgba(228,200,120,0.16), transparent 70%);
+  pointer-events:none;
+  filter:blur(10px);
+}
+
+.encabezado{
+  position:relative;
+  text-align:center;
+  margin-bottom:4vh;
+}
+.eyebrow{
+  margin:0 0 6px;
+  font-family:var(--cuerpo);
+  font-style:italic;
+  letter-spacing:0.14em;
+  text-transform:uppercase;
+  font-size:0.75rem;
+  color:var(--oro-suave);
+  opacity:0.85;
+}
+.encabezado h1{
+  margin:0;
+  font-family:var(--display);
+  font-weight:600;
+  font-size:clamp(2rem, 5vw, 3.2rem);
+  color:var(--marfil);
+  text-shadow:0 2px 18px rgba(0,0,0,0.5);
+}
+
+/* ============================================
+   LIBRO 3D
+   ============================================ */
+   /* Transición suave para ocultar el libro */
+.perspectiva {
+  transition: opacity 0.5s ease;
+}
+
+.controles,
+.marcador {
+  transition: opacity 0.5s ease;
+}
+
+.perspectiva{
+  perspective:2200px;
+  position:relative;
+}
+
+.libro-tilt{
+  transform-style:preserve-3d;
+  transition:transform 0.25s ease-out;
+  transform:
+    rotateX(calc(var(--tilt-y, 0) * -1deg))
+    rotateY(calc(var(--tilt-x, 0) * 1deg));
+}
+
+.libro{
+  position:relative;
+  width:300px;
+  height:420px;
+  transform-style:preserve-3d;
+  margin-left:14px; /* deja ver el lomo */
+}
+
+/* Lomo de cuero detrás del libro */
+.libro::before{
+  content:"";
+  position:absolute;
+  left:-14px;
+  top:6px;
+  width:16px;
+  height:calc(100% - 12px);
+  background:linear-gradient(180deg, var(--cuero-claro), var(--cuero-oscuro));
+  border-radius:4px 0 0 4px;
+  box-shadow:inset -3px 0 6px rgba(0,0,0,0.5);
+  z-index:7;
+}
+
+/* sombra de piso, se desplaza en sentido contrario a la inclinación */
+.libro::after{
+  content:"";
+  position:absolute;
+  bottom:-34px;
+  left:8%;
+  width:84%;
+  height:34px;
+  background:radial-gradient(ellipse at center, rgba(0,0,0,0.55), transparent 72%);
+  transform:translateX(calc(var(--tilt-x, 0) * -3px));
+  z-index:0;
+}
+
+.tapa-fija{
+  position:absolute;
+  inset:0;
+  border-radius:2px 10px 10px 2px;
+}
+.tapa-trasera{
+  z-index:1;
+  background:
+    repeating-linear-gradient(115deg, rgba(0,0,0,0.06) 0 2px, transparent 2px 6px),
+    linear-gradient(135deg, var(--cuero-claro), var(--cuero-oscuro) 70%);
+  box-shadow:0 18px 40px rgba(0,0,0,0.55);
+}
+
+.hoja{
+  position:absolute;
+  inset:0;
+  transform-style:preserve-3d;
+  transform-origin:left center;
+  transition:transform 1.15s cubic-bezier(0.45,0.05,0.15,1);
+  cursor:pointer;
+}
+.hoja.volteada{ transform:rotateY(-180deg); }
+
+.cara{
+  position:absolute;
+  inset:0;
+  backface-visibility:hidden;
+  border-radius:2px 10px 10px 2px;
+  overflow:hidden;
+}
+.cara-dorso{ transform:rotateY(180deg); }
+
+/* Cara tipo cuero (portada) */
+.portada{
+  background:
+    repeating-linear-gradient(115deg, rgba(0,0,0,0.07) 0 2px, transparent 2px 6px),
+    linear-gradient(135deg, var(--cuero-claro), var(--cuero-oscuro) 75%);
+  box-shadow:0 18px 45px rgba(0,0,0,0.6), inset 0 0 0 8px rgba(201,162,75,0.18);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.marco-portada{
+  text-align:center;
+  padding:18px 22px;
+  border:1px solid rgba(228,200,120,0.55);
+  border-radius:6px;
+}
+.titulo-portada{
+  margin:10px 0 4px;
+  font-family:var(--display);
+  color:var(--oro-suave);
+  font-size:1.9rem;
+  line-height:1.15;
+  text-shadow:0 2px 8px rgba(0,0,0,0.4);
+}
+.subtitulo-portada{
+  margin:0;
+  font-family:var(--firma);
+  font-size:1.3rem;
+  color:var(--marfil);
+}
+.adorno{ color:var(--oro-suave); font-size:1.1rem; }
+
+/* Cara tipo hoja marfil */
+.pagina, .pagina-final{
+  background:linear-gradient(135deg, var(--marfil), var(--marfil-sombra));
+  box-shadow:0 14px 30px rgba(0,0,0,0.35);
+  color:var(--carbon);
+}
+.contenido-pagina, .contenido-final{
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:22px;
+  text-align:center;
+  position:relative;
+}
+.foto-marco{
+  width:80%;
+  aspect-ratio:4/3;
+  padding:6px;
+  background:#fff;
+  box-shadow:0 6px 16px rgba(0,0,0,0.25);
+  transform:rotate(-1.2deg);
+  margin-bottom:16px;
+  position:relative;
+  overflow:hidden;
+}
+/* destello que recorre la foto periódicamente */
+.foto-marco::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(115deg, transparent 40%, rgba(255,255,255,0.75) 50%, transparent 60%);
+  transform:translateX(-120%);
+  animation:destello-foto 6s ease-in-out infinite;
+  animation-delay:1.2s;
+  pointer-events:none;
+}
+@keyframes destello-foto{
+  0%, 82%{ transform:translateX(-120%); }
+  92%{ transform:translateX(120%); }
+  100%{ transform:translateX(120%); }
+}
+.foto-placeholder{
+  width:100%;
+  height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:repeating-linear-gradient(45deg, #e7ddc4, #e7ddc4 10px, #ddd0ae 10px, #ddd0ae 20px);
+  color:#8a7350;
+  font-family:var(--cuerpo);
+  font-style:italic;
+}
+.texto-pagina{
+  margin:0;
+  font-size:1.15rem;
+  font-style:italic;
+  line-height:1.5;
+}
+.numero-pagina{
+  position:absolute;
+  bottom:10px;
+  right:16px;
+  font-size:0.85rem;
+  color:#9c8a63;
+}
+
+.pagina-final .contenido-final h2{
+  font-family:var(--display);
+  color:var(--vino);
+  font-size:1.7rem;
+  margin:8px 0 10px;
+}
+.pagina-final p{
+  font-size:1.1rem;
+  line-height:1.5;
+  margin:0 0 14px;
+}
+.firma{
+  font-family:var(--firma);
+  font-size:1.4rem;
+  color:var(--vino);
+}
+
+/* ============================================
+   CONTROLES
+   ============================================ */
+.controles{
+  display:flex;
+  align-items:center;
+  gap:22px;
+  margin-top:52px;
+}
+.btn-control{
+  width:44px;
+  height:44px;
+  border-radius:50%;
+  border:1px solid rgba(228,200,120,0.5);
+  background:rgba(255,255,255,0.04);
+  color:var(--oro-suave);
+  font-size:1.1rem;
+  cursor:pointer;
+  transition:background 0.2s, transform 0.2s;
+}
+.btn-control:hover{ background:rgba(228,200,120,0.16); transform:translateY(-2px); }
+.btn-control:disabled{ opacity:0.3; cursor:default; transform:none; }
+
+.indicador{
+  font-family:var(--cuerpo);
+  font-style:italic;
+  font-size:0.95rem;
+  color:var(--marfil);
+  min-width:150px;
+  text-align:center;
+}
+
+.pista{
+  margin-top:14px;
+  font-size:0.8rem;
+  color:rgba(251,246,236,0.5);
+  font-style:italic;
+}
+
+/* Luz que sigue al cursor sobre el libro */
+.brillo-libro{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  z-index:8;
+  opacity:0;
+  transition:opacity 0.35s ease;
+  background:radial-gradient(
+    circle 160px at var(--luz-x, 50%) var(--luz-y, 30%),
+    rgba(255,244,214,0.35),
+    transparent 70%
+  );
+  mix-blend-mode:soft-light;
+}
+.brillo-libro.activa{ opacity:1; }
+
+/* Cursor parpadeante del texto que se escribe solo */
+.cursor-escritura{
+  display:inline-block;
+  width:2px;
+  margin-left:2px;
+  background:currentColor;
+  animation:parpadeo-cursor 0.85s steps(1) infinite;
+}
+@keyframes parpadeo-cursor{
+  0%,49%{ opacity:1; }
+  50%,100%{ opacity:0; }
+}
+
+/* ============================================
+   MÚSICA
+   ============================================ */
+.btn-musica{
+  position:fixed;
+  top:20px;
+  right:20px;
+  z-index:50;
+  width:48px;
+  height:48px;
+  border-radius:50%;
+  border:1px solid rgba(228,200,120,0.5);
+  background:rgba(18,13,10,0.55);
+  backdrop-filter:blur(4px);
+  color:var(--oro-suave);
+  font-size:1.3rem;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:background 0.2s, transform 0.2s;
+}
+.btn-musica:hover{ background:rgba(228,200,120,0.18); transform:scale(1.06); }
+.btn-musica.sonando .icono-musica{ animation:pulso-nota 1.4s ease-in-out infinite; }
+
+@keyframes pulso-nota{
+  0%,100%{ transform:scale(1); }
+  50%{ transform:scale(1.22); }
+}
+
+/* ============================================
+   CAPAS DE EFECTOS (contenedores a pantalla completa)
+   ============================================ */
+.capa-particulas,
+.capa-petalos,
+.capa-corazones{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:2;
+  overflow:hidden;
+}
+.capa-corazones{ z-index:60; } /* por encima de todo, siguen al cursor */
+
+/* Partículas brillantes ambientales */
+.particula{
+  position:absolute;
+  border-radius:50%;
+  background:radial-gradient(circle, #fff6dc 0%, var(--oro-suave) 55%, transparent 75%);
+  opacity:0;
+  animation:parpadeo-particula linear infinite;
+}
+@keyframes parpadeo-particula{
+  0%{ opacity:0; transform:translateY(0) scale(0.6); }
+  10%{ opacity:var(--brillo-max, 0.8); }
+  50%{ opacity:calc(var(--brillo-max, 0.8) * 0.5); transform:translateY(-40px) scale(1); }
+  90%{ opacity:0.15; }
+  100%{ opacity:0; transform:translateY(-90px) scale(0.6); }
+}
+
+/* Pétalos y rosas cayendo */
+.petalo{
+  position:absolute;
+  top:-40px;
+  will-change:transform;
+  animation-name:caida-petalo;
+  animation-timing-function:linear;
+  animation-iteration-count:infinite;
+  filter:drop-shadow(0 2px 3px rgba(0,0,0,0.25));
+}
+@keyframes caida-petalo{
+  0%{ transform:translate(0,0) rotate(0deg); }
+  100%{ transform:translate(var(--deriva, 40px), 108vh) rotate(var(--giro, 360deg)); }
+}
+
+/* Corazones que siguen al cursor */
+.corazon-cursor{
+  position:absolute;
+  color:var(--vino);
+  font-size:1.1rem;
+  opacity:0.9;
+  animation:flotar-corazon 1.4s ease-out forwards;
+}
+@keyframes flotar-corazon{
+  0%{ transform:translate(-50%,-50%) scale(0.7); opacity:0.9; }
+  100%{ transform:translate(-50%, -90px) scale(1.1); opacity:0; }
+}
+
+/* ============================================
+   CONTADOR DE TIEMPO JUNTOS
+   ============================================ */
+.contador{
+  margin:10px 0 0;
+  font-size:0.9rem;
+  font-style:italic;
+  color:var(--oro-suave);
+  opacity:0.9;
+}
+#contador-valores{
+  font-variant-numeric:tabular-nums;
+  color:var(--marfil);
+  font-style:normal;
+}
+
+/* ============================================
+   MARCADOR DEL LIBRO (cinta de pestañas)
+   ============================================ */
+.marcador{
+  position:absolute;
+  top:14px;
+  right:-2px;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  z-index:70;
+}
+.pestana{
+  width:34px;
+  padding:8px 0;
+  border:none;
+  border-radius:3px 0 0 3px;
+  background:linear-gradient(160deg, var(--vino), #591f29);
+  color:var(--marfil);
+  font-family:var(--cuerpo);
+  font-size:0.75rem;
+  cursor:pointer;
+  box-shadow:-3px 3px 8px rgba(0,0,0,0.4);
+  transform:translateX(8px);
+  transition:transform 0.2s, background 0.2s;
+}
+.pestana:hover{ transform:translateX(0); }
+.pestana.activa{
+  background:linear-gradient(160deg, var(--oro-suave), var(--oro));
+  color:var(--carbon);
+  transform:translateX(-4px);
+}
+
+/* ============================================
+   FOTOS VOLTEABLES (recuerdos interactivos)
+   ============================================ */
+.foto-flip{
+  width:80%;
+  aspect-ratio:4/3;
+  margin-bottom:16px;
+  perspective:900px;
+  cursor:pointer;
+}
+.foto-flip-interior{
+  position:relative;
+  width:100%;
+  height:100%;
+  transform-style:preserve-3d;
+  transition:transform 0.9s cubic-bezier(0.45,0.05,0.15,1);
+}
+.foto-flip.volteada .foto-flip-interior{ transform:rotateY(180deg); }
+
+.foto-cara{
+  position:absolute;
+  inset:0;
+  backface-visibility:hidden;
+}
+.foto-flip .foto-marco{
+  width:100%;
+  margin-bottom:0;
+}
+.foto-nota{
+  transform:rotateY(180deg);
+  background:linear-gradient(135deg, var(--marfil), var(--marfil-sombra));
+  box-shadow:0 6px 16px rgba(0,0,0,0.25);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:12px;
+}
+.foto-nota p{
+  margin:0;
+  font-family:var(--firma);
+  font-size:1.15rem;
+  line-height:1.3;
+  color:var(--vino);
+  text-align:center;
+}
+
+/* ============================================
+   CARTAS OCULTAS
+   ============================================ */
+.sobre-carta{
+  position:absolute;
+  bottom:10px;
+  left:16px;
+  width:30px;
+  height:30px;
+  border:none;
+  border-radius:50%;
+  background:rgba(124,45,59,0.12);
+  color:var(--vino);
+  font-size:1rem;
+  cursor:pointer;
+  transition:transform 0.2s, background 0.2s;
+}
+.sobre-carta:hover{ background:rgba(124,45,59,0.22); transform:scale(1.1) rotate(-6deg); }
+.sobre-carta-final{ position:static; margin-top:14px; }
+
+/* ============================================
+   BOTÓN DE VIDEO
+   ============================================ */
+.boton-video{
+  border:1px solid var(--vino);
+  background:transparent;
+  color:var(--vino);
+  font-family:var(--cuerpo);
+  font-style:italic;
+  font-size:0.95rem;
+  padding:6px 14px;
+  border-radius:20px;
+  cursor:pointer;
+  margin-bottom:10px;
+  transition:background 0.2s, color 0.2s;
+}
+.boton-video:hover{ background:var(--vino); color:var(--marfil); }
+
+/* ============================================
+   MODAL (cartas y video)
+   ============================================ */
+.modal-fondo{
+  position:fixed;
+  inset:0;
+  background:rgba(10,7,5,0.72);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  z-index:100;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity 0.25s ease;
+}
+.modal-fondo.visible{ opacity:1; pointer-events:auto; }
+
+.modal-caja{
+  position:relative;
+  width:min(440px, 100%);
+  max-height:80vh;
+  overflow:auto;
+  background:linear-gradient(160deg, var(--marfil), var(--marfil-sombra));
+  color:var(--carbon);
+  border-radius:8px;
+  padding:32px 26px;
+  box-shadow:0 24px 60px rgba(0,0,0,0.5);
+  transform:scale(0.92);
+  transition:transform 0.25s ease;
+}
+.modal-fondo.visible .modal-caja{ transform:scale(1); }
+
+.modal-cerrar{
+  position:absolute;
+  top:10px;
+  right:12px;
+  width:30px;
+  height:30px;
+  border:none;
+  border-radius:50%;
+  background:rgba(43,33,25,0.08);
+  color:var(--carbon);
+  cursor:pointer;
+  font-size:0.9rem;
+}
+.modal-cerrar:hover{ background:rgba(43,33,25,0.18); }
+
+.modal-contenido h3{
+  font-family:var(--display);
+  color:var(--vino);
+  margin:0 0 12px;
+}
+.modal-contenido p{
+  font-family:var(--firma);
+  font-size:1.3rem;
+  line-height:1.5;
+  margin:0;
+}
+.modal-contenido video{
+  width:100%;
+  border-radius:6px;
+  display:block;
+}
+
+/* ============================================
+   CICLO DÍA / NOCHE AUTOMÁTICO
+   ============================================ */
+.capa-cielo{
+  position:fixed;
+  inset:0;
+  z-index:-1;
+  overflow:hidden;
+  pointer-events:none;
+  animation:ciclo-cielo 48s linear infinite;
+}
+@keyframes ciclo-cielo{
+  0%,100%{ background:radial-gradient(ellipse 120% 70% at 50% 100%, #241a12 0%, var(--noche) 60%); } /* noche */
+  25%{ background:radial-gradient(ellipse 120% 70% at 50% 100%, #3a2a1c 0%, #1c130e 60%); } /* madrugada */
+  50%{ background:radial-gradient(ellipse 120% 70% at 50% 20%, #5c3f2e 0%, #2a1c12 70%); } /* atardecer dorado */
+  75%{ background:radial-gradient(ellipse 120% 70% at 50% 100%, #2c1f16 0%, #171009 60%); } /* anochecer */
+}
+
+.sol-luna{
+  position:absolute;
+  left:50%;
+  width:70px;
+  height:70px;
+  border-radius:50%;
+  transform:translateX(-50%);
+  animation:trayecto-astro 48s linear infinite;
+  box-shadow:0 0 60px 20px currentColor;
+  opacity:0.8;
+}
+@keyframes trayecto-astro{
+  0%,100%{ top:70%; background:#cfd8ea; color:rgba(207,216,234,0.35); opacity:0.55; } /* luna */
+  50%{ top:6%; background:var(--oro-suave); color:rgba(228,200,120,0.45); opacity:0.9; } /* sol */
+}
+
+.capa-estrellas{
+  position:absolute;
+  inset:0;
+  opacity:0;
+  animation:aparecer-estrellas 48s linear infinite;
+}
+.capa-estrellas .estrella{
+  position:absolute;
+  width:2px;
+  height:2px;
+  border-radius:50%;
+  background:#fff;
+  animation:titilar-estrella 3s ease-in-out infinite;
+}
+@keyframes aparecer-estrellas{
+  0%,15%,85%,100%{ opacity:1; }
+  35%,65%{ opacity:0; }
+}
+@keyframes titilar-estrella{
+  0%,100%{ opacity:0.2; }
+  50%{ opacity:1; }
+}
+
+/* ============================================
+   FUEGOS ARTIFICIALES DEL FINAL
+   ============================================ */
+.canvas-fuegos{
+  position:fixed;
+  inset:0;
+  width:100%;
+  height:100%;
+  z-index:90;
+  pointer-events:none;
+  opacity:0;
+  transition:opacity 0.6s ease;
+}
+.canvas-fuegos.activo{ opacity:1; }
+
+/* ============================================
+   ESTALLIDO DE CORAZONES DEL FINAL
+   ============================================ */
+.capa-corazones-final{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:61;
+  overflow:hidden;
+}
+.corazon-final{
+  position:absolute;
+  bottom:-10%;
+  color:var(--vino);
+  animation-name:ascenso-corazon-final;
+  animation-timing-function:ease-out;
+  animation-iteration-count:1;
+}
+@keyframes ascenso-corazon-final{
+  0%{ transform:translateY(0) scale(0.6) rotate(0deg); opacity:0; }
+  10%{ opacity:0.95; }
+  100%{ transform:translateY(-115vh) scale(1.1) rotate(var(--giro-final, 40deg)); opacity:0; }
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (min-width:640px){
+  .libro{ width:380px; height:520px; }
+  .titulo-portada{ font-size:2.3rem; }
+}
+
+@media (min-width:1024px){
+  .libro{ width:440px; height:600px; }
+}
+
+@media (max-width:480px){
+  .pestana{ width:28px; font-size:0.68rem; padding:6px 0; }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .hoja{ transition:none; }
+  .petalo, .particula, .corazon-cursor{ animation:none !important; display:none; }
+  .foto-marco::after{ animation:none; display:none; }
+  .libro-tilt{ transition:none; transform:none !important; }
+  .brillo-libro{ display:none; }
+  .foto-flip-interior{ transition:none; }
+  .capa-cielo, .sol-luna, .capa-estrellas, .capa-estrellas .estrella{ animation:none !important; }
+  .capa-cielo{ background:radial-gradient(ellipse 120% 70% at 50% 100%, #241a12 0%, var(--noche) 60%); }
+  .corazon-final{ animation:none !important; display:none; }
+  .canvas-fuegos{ display:none; }
+}
