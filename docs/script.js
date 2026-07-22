@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   const hojas = Array.from(document.querySelectorAll('.hoja'));
   const total = hojas.length;
+  const libro = document.getElementById('libro');
   const btnPrev = document.getElementById('btn-prev');
   const btnNext = document.getElementById('btn-next');
   const indicador = document.getElementById('indicador');
@@ -8,11 +9,15 @@ document.addEventListener('DOMContentLoaded', () => {
   // estado: cuántas hojas están volteadas (0 = libro cerrado, total = libro terminado)
   let abiertas = 0;
 
+  // detecta dispositivos táctiles/móviles (sin hover), donde aplica el efecto cinematográfico
+  function esMovil() {
+    return window.matchMedia('(hover: none)').matches;
+  }
+
   const etiquetas = [
     'Portada cerrada',
-    'Página 1',
-    'Páginas 2 y 3',
-    'Página 4',
+    'Páginas 1 y 2',
+    'Páginas 3 y 4',
     'Página final'
   ];
 
@@ -25,27 +30,63 @@ document.addEventListener('DOMContentLoaded', () => {
       hoja.style.zIndex = volteada ? (total + i + 1) : (total - i);
       hoja.classList.toggle('volteada', volteada);
     });
+    libro.classList.toggle('abierto', abiertas > 0);
     mostrarCaraActual();
   }
 
   function actualizarControles() {
     btnPrev.disabled = abiertas === 0;
-    btnNext.disabled = abiertas === total;
+    btnNext.disabled = false; // en la última página, "siguiente" cierra el libro (dispara el final)
     indicador.textContent = etiquetas[abiertas] ?? '';
 
     document.querySelectorAll('.pestana').forEach((pestana) => {
       pestana.classList.toggle('activa', Number(pestana.dataset.ir) === abiertas);
     });
+  }
 
-    if (abiertas === total) {
-      iniciarFinalEspectacular();
-    } else {
-      detenerFinalEspectacular();
+  // ==========================================
+  // EFECTO CINEMATOGRÁFICO (solo en móvil)
+  // ==========================================
+  // En un celular el spread de dos páginas no entra completo en la pantalla, así que
+  // se navega de a una página: primero se enfoca la izquierda, un toque desplaza la
+  // cámara a la derecha del mismo spread (sin voltear), y el siguiente toque sí voltea
+  // la hoja (con un leve alejamiento y luego acercamiento) para revelar el próximo spread.
+  const libroTilt = document.getElementById('libro-tilt');
+  let idCinematica = null;
+  let enfoqueDerecha = false; // en qué mitad del spread actual está la cámara (solo móvil)
+
+  function cinematicaMovil(tipo) {
+    if (!esMovil() || prefiereMenosMovimiento) return;
+    clearTimeout(idCinematica);
+
+    if (tipo === 'centrar') {
+      libroTilt.style.transformOrigin = 'center center';
+      libroTilt.style.transform = 'scale(1)';
+      return;
     }
+    if (tipo === 'pan-izquierda') {
+      libroTilt.style.transformOrigin = '26% center';
+      libroTilt.style.transform = 'scale(1.32)';
+      return;
+    }
+    if (tipo === 'pan-derecha') {
+      libroTilt.style.transformOrigin = '74% center';
+      libroTilt.style.transform = 'scale(1.32)';
+      return;
+    }
+
+    // 'flip-izquierda': leve alejamiento (coincide con el volteo de la hoja) y luego
+    // leve acercamiento hacia la página izquierda recién revelada
+    libroTilt.style.transformOrigin = 'center center';
+    libroTilt.style.transform = 'scale(0.92)';
+    idCinematica = setTimeout(() => {
+      libroTilt.style.transformOrigin = '26% center';
+      libroTilt.style.transform = 'scale(1.32)';
+    }, 420);
   }
 
   function siguiente() {
-    if (abiertas >= total) return;
+    if (abiertas >= total) { cerrarLibroFinal(); return; }
     abiertas++;
     actualizarZIndex();
     actualizarControles();
@@ -58,20 +99,51 @@ document.addEventListener('DOMContentLoaded', () => {
     actualizarControles();
   }
 
+  // Navegación móvil: un toque avanza UNA página a la vez (no un spread completo)
+  function avanzarMovil() {
+    if (abiertas === total) { cerrarLibroFinal(); return; }
+    const spreadConDerecha = abiertas >= 1 && abiertas < total;
+    if (spreadConDerecha && !enfoqueDerecha) {
+      // ya vimos la izquierda de este spread: solo desplazamos la cámara a la derecha
+      enfoqueDerecha = true;
+      cinematicaMovil('pan-derecha');
+      return;
+    }
+    siguiente();
+    enfoqueDerecha = false;
+    cinematicaMovil('flip-izquierda');
+  }
+
+  function retrocederMovil() {
+    if (enfoqueDerecha) {
+      enfoqueDerecha = false;
+      cinematicaMovil('pan-izquierda');
+      return;
+    }
+    if (abiertas === 0) return;
+    anterior();
+    enfoqueDerecha = false;
+    cinematicaMovil(abiertas === 0 ? 'centrar' : 'flip-izquierda');
+  }
+
   // Click directo sobre una hoja: si está arriba de la pila, la voltea
   hojas.forEach((hoja, i) => {
     hoja.addEventListener('click', () => {
+      if (esMovil()) { avanzarMovil(); return; }
       if (i === abiertas) siguiente();
-      else if (i === abiertas - 1) anterior();
+      else if (i === abiertas - 1) {
+        if (abiertas === total) cerrarLibroFinal();
+        else anterior();
+      }
     });
   });
 
-  btnNext.addEventListener('click', siguiente);
-  btnPrev.addEventListener('click', anterior);
+  btnNext.addEventListener('click', () => { if (esMovil()) avanzarMovil(); else siguiente(); });
+  btnPrev.addEventListener('click', () => { if (esMovil()) retrocederMovil(); else anterior(); });
 
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowRight') siguiente();
-    if (e.key === 'ArrowLeft') anterior();
+    if (e.key === 'ArrowRight') { if (esMovil()) avanzarMovil(); else siguiente(); }
+    if (e.key === 'ArrowLeft') { if (esMovil()) retrocederMovil(); else anterior(); }
   });
 
   actualizarZIndex();
@@ -226,7 +298,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // LUZ E INCLINACIÓN QUE SIGUEN AL MOUSE
   // ==========================================
   const perspectiva = document.getElementById('perspectiva');
-  const libroTilt = document.getElementById('libro-tilt');
   const brilloLibro = document.getElementById('brillo-libro');
 
   if (!prefiereMenosMovimiento && window.matchMedia('(hover: hover)').matches) {
@@ -259,8 +330,10 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.pestana').forEach((pestana) => {
     pestana.addEventListener('click', () => {
       abiertas = Number(pestana.dataset.ir);
+      enfoqueDerecha = false;
       actualizarZIndex();
       actualizarControles();
+      cinematicaMovil(abiertas === 0 ? 'centrar' : 'flip-izquierda');
     });
   });
 
@@ -321,11 +394,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // ==========================================
   // 👉 Escribe aquí el mensaje secreto de cada sobre (mismo orden que data-carta="0,1,2,3,4")
   const mensajesSecretos = [
-  'Selena, cuando te conocí no sabía que me estabas salvando de la soledad más profunda. Tú llegaste sin pedir nada, y sin darte cuenta, te convertiste en la primera persona en la que confié. Gracias por haber sido mi refugio.',
+  'Babysita, cuando te conocí no sabía que me estabas salvando de la soledad más profunda. Tú llegaste sin pedir nada, y sin darte cuenta, te convertiste en la primera persona en la que confié. Gracias por haber sido mi refugio.',
   'El día que te vi en Ecuador supe que no eras una persona cualquiera. Eras la persona que desafiaría al mundo solo para estar conmigo. Y yo, en silencio, te prometí que nunca olvidaría ese gesto.',
   'Las madrugadas no eran pesadas, porque esperaba tu voz. Cada llamada, cada risa, cada silencio compartido... todo eso fue más valioso que cualquier relación que pude haber tenido. Fuiste mi tiempo favorito.',
   'Cuando te dije que te amaba y tú me dijiste "no podemos", sentí que el mundo se detenía. Pero entendí que no lo decías por falta de amor, sino por exceso de miedo. Nunca te reproché nada. Solo quise que supieras que siempre estuve, y siempre estaré.',
-  'Hoy es tu día, Selena. Y aunque nuestras conversaciones ya no sean las mismas, aunque el silencio a veces sea más largo que las palabras, quiero que sepas algo que nunca te dije: Me enseñaste a confiar, a abrirme, a querer. Puede que el destino nos haya puesto en caminos diferentes, pero siempre serás la persona que me hizo sentir que no estaba solo. Gracias por existir. Te quiero. Siempre.'
+  'Hoy es tu día, Babysita. Y aunque nuestras conversaciones ya no sean las mismas, aunque el silencio a veces sea más largo que las palabras, quiero que sepas algo que nunca te dije: Me enseñaste a confiar, a abrirme, a querer. Puede que el destino nos haya puesto en caminos diferentes, pero siempre serás la persona que me hizo sentir que no estaba solo. Gracias por existir. Te quiero. Siempre.'
 ];
 
   document.querySelectorAll('.sobre-carta').forEach((sobre) => {
@@ -497,23 +570,52 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ==========================================
-  // ORQUESTA EL FINAL ESPECTACULAR
+  // CIERRE DEL LIBRO EN LA PÁGINA FINAL
   // ==========================================
+  // La página de "Feliz Cumpleaños" se muestra como una página más, sin ningún
+  // efecto especial. Solo cuando el usuario, ya en esa página, vuelve a tocar/hacer
+  // clic en el libro (como quien lo cierra) se desvanece, aparecen los fuegos
+  // artificiales durante 5 segundos, y luego el libro reaparece cerrado, listo
+  // para abrirse y recorrerse de nuevo.
   let finalActivo = false;
-  
+
   actualizarControles();
 
-  function iniciarFinalEspectacular() {
-    if (finalActivo || prefiereMenosMovimiento) return;
+  function cerrarLibroFinal() {
+    if (finalActivo || prefiereMenosMovimiento) {
+      // sin animaciones: igual reinicia el libro directamente
+      if (prefiereMenosMovimiento && !finalActivo) {
+        abiertas = 0;
+        enfoqueDerecha = false;
+        actualizarZIndex();
+        actualizarControles();
+      }
+      return;
+    }
     finalActivo = true;
-    iniciarFuegosArtificiales();
-    iniciarLluviaCorazonesFinal();
-  }
 
-  function detenerFinalEspectacular() {
-    if (!finalActivo) return;
-    finalActivo = false;
-    detenerFuegosArtificiales();
-    detenerLluviaCorazonesFinal();
+    cinematicaMovil('centrar');
+    perspectiva.style.pointerEvents = 'none';
+    perspectiva.style.opacity = '0';
+
+    // deja terminar el desvanecido (0.6s) antes de lanzar los fuegos artificiales
+    setTimeout(() => {
+      iniciarFuegosArtificiales();
+      iniciarLluviaCorazonesFinal();
+
+      setTimeout(() => {
+        detenerFuegosArtificiales();
+        detenerLluviaCorazonesFinal();
+
+        abiertas = 0;
+        enfoqueDerecha = false;
+        actualizarZIndex();
+        actualizarControles();
+
+        perspectiva.style.opacity = '1';
+        perspectiva.style.pointerEvents = '';
+        finalActivo = false;
+      }, 5000);
+    }, 650);
   }
 });
