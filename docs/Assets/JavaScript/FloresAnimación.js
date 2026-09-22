@@ -4,10 +4,10 @@ const btn = document.getElementById('start-btn');
 const msg = document.getElementById('message');
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x0d0d1a); // Noche suave
+scene.background = new THREE.Color(0x0d0d1a);
 
 const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.set(0, 2, 22);
+camera.position.set(0, 2, 24);
 camera.lookAt(0, 0, 0);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
@@ -23,188 +23,226 @@ controls.minDistance = 10;
 controls.maxDistance = 45;
 controls.target.set(0, 0, 0);
 
-// --- CONFIGURACIÓN DEL RAMO DE FLORES AMARILLAS ---
-const particleCount = 18000;
+// --- CONFIGURACIÓN DEL RAMO DE NOMEOLVIDES ---
+const particleCount = 20000;
 const geometry = new THREE.BufferGeometry();
 const positions = new Float32Array(particleCount * 3);
 const initialPositions = new Float32Array(particleCount * 3);
 const targetPositions = new Float32Array(particleCount * 3);
 const colors = new Float32Array(particleCount * 3);
-const sizes = new Float32Array(particleCount);
 
 const color = new THREE.Color();
 
-// --- FUNCIONES PARA GENERAR LAS PARTES DEL RAMO ---
+// --- FUNCIONES PARA GENERAR LAS PARTES ---
 
-// TALLO: línea vertical con ligera curvatura
-function generarTallo(alturaBase, alturaMax, radio) {
-    const t = Math.random();
-    const y = alturaBase + t * (alturaMax - alturaBase);
-    // Curvatura suave del tallo
-    const curvatura = Math.sin(t * Math.PI) * 0.5;
-    const x = (Math.random() - 0.5) * radio + curvatura * 0.3;
-    const z = (Math.random() - 0.5) * radio;
-    return [x, y, z];
-}
-
-// HOJA: óvalo pequeño en el tallo
-function generarHoja(baseX, baseY, baseZ) {
-    const t = Math.random();
-    const lado = Math.random() < 0.5 ? -1 : 1;
-    // Hoja ovalada
-    const ancho = 0.6;
-    const largo = 1.2;
-    const angulo = Math.random() * Math.PI * 2;
-    const radioHoja = Math.sqrt(Math.random());
-    
-    const x = baseX + lado * (Math.cos(angulo) * radioHoja * ancho * 0.5 + 0.3);
-    const y = baseY + Math.sin(angulo) * radioHoja * largo * 0.3;
-    const z = baseZ + Math.sin(angulo) * radioHoja * ancho * 0.3;
-    return [x, y, z];
-}
-
-// FLOR: centro + pétalos
-function generarFlor(centroX, centroY, centroZ, tamano) {
+// FLOR: pétalos azules + centro amarillo
+function generarFlor(centroX, centroY, centroZ, tamano, numPetalos) {
     const parte = Math.random();
+    const esCentro = parte < 0.2; // 20% centro, 80% pétalos
     
-    if (parte < 0.25) {
-        // CENTRO de la flor (marrón oscuro)
-        const r = Math.random() * tamano * 0.25;
+    if (esCentro) {
+        // CENTRO AMARILLO con puntitos
+        const r = Math.random() * tamano * 0.3;
         const theta = Math.random() * Math.PI * 2;
         const phi = Math.acos(2 * Math.random() - 1);
+        
         const x = centroX + r * Math.sin(phi) * Math.cos(theta);
         const y = centroY + r * Math.sin(phi) * Math.sin(theta);
         const z = centroZ + r * Math.cos(phi);
-        return [x, y, z, 'centro'];
+        
+        // Pequeños puntitos marrones/naranjas dentro del centro
+        const esPuntito = Math.random() < 0.15;
+        if (esPuntito) {
+            color.setHSL(0.08, 1.0, 0.3 + Math.random() * 0.2); // Naranja/marrón
+        } else {
+            color.setHSL(0.13, 1.0, 0.5 + Math.random() * 0.3); // Amarillo brillante
+        }
+        
+        return [x, y, z, color];
     } else {
-        // PÉTALOS (amarillos)
-        const numPetalos = 6 + Math.floor(Math.random() * 3);
-        const anguloPetalo = Math.floor(Math.random() * numPetalos) * (Math.PI * 2 / numPetalos);
-        const distancia = tamano * (0.4 + Math.random() * 0.4);
+        // PÉTALOS AZULES (5 pétalos como la flor real)
+        const petaloIdx = Math.floor(Math.random() * numPetalos);
+        const anguloPetalo = (petaloIdx / numPetalos) * Math.PI * 2 + (Math.random() - 0.5) * 0.3;
         
-        // Forma de pétalo (elipse alargada)
-        const anchoPetalo = tamano * 0.3;
-        const largoPetalo = tamano * 0.8;
+        // Cada pétalo es una elipse alargada
+        const distanciaBase = tamano * 0.3;
+        const largoPetalo = tamano * 0.9;
+        const anchoPetalo = tamano * 0.45;
+        
+        // Posición dentro del pétalo (elipse)
         const t = Math.random();
-        const radioPetalo = Math.sqrt(Math.random());
+        const radio = Math.sqrt(Math.random()); // Distribución uniforme en elipse
         
-        const px = Math.cos(anguloPetalo) * distancia + Math.cos(anguloPetalo + Math.PI/2) * (Math.random() - 0.5) * anchoPetalo;
-        const py = Math.sin(anguloPetalo) * distancia + Math.sin(anguloPetalo + Math.PI/2) * (Math.random() - 0.5) * anchoPetalo;
-        const pz = (Math.random() - 0.5) * tamano * 0.3;
+        // Coordenadas locales del pétalo (eje X = largo, Y = ancho)
+        const localX = distanciaBase + t * largoPetalo * 0.8;
+        const localY = (Math.random() - 0.5) * anchoPetalo * (1 - t * 0.5); // Se estrecha al final
         
-        return [centroX + px, centroY + py * 0.6, centroZ + pz, 'petalo'];
+        // Rotar el pétalo según su ángulo
+        const x = centroX + Math.cos(anguloPetalo) * localX - Math.sin(anguloPetalo) * localY;
+        const y = centroY + Math.sin(anguloPetalo) * localX + Math.cos(anguloPetalo) * localY;
+        const z = centroZ + (Math.random() - 0.5) * tamano * 0.2;
+        
+        // COLOR AZUL con degradado (más claro en la punta, más oscuro cerca del centro)
+        const gradiente = t; // 0 = cerca del centro, 1 = punta
+        const hue = 0.55 + gradiente * 0.05; // Azul a azul más claro
+        const sat = 0.7 + gradiente * 0.3;
+        const light = 0.3 + gradiente * 0.4; // Más claro en las puntas
+        
+        // Variación aleatoria para dar textura
+        color.setHSL(
+            hue + (Math.random() - 0.5) * 0.03,
+            sat + (Math.random() - 0.5) * 0.1,
+            light + (Math.random() - 0.5) * 0.1
+        );
+        
+        return [x, y, z, color];
     }
 }
 
-// --- GENERAR EL RAMO ---
-// El ramo tiene varias flores en diferentes posiciones
-const flores = [
-    { x: 0, y: 4, z: 0, tamano: 2.0 },      // Flor central
-    { x: -2.5, y: 3, z: 0.5, tamano: 1.7 },  // Flor izquierda
-    { x: 2.5, y: 3.2, z: -0.5, tamano: 1.8 }, // Flor derecha
-    { x: -1.2, y: 5, z: -0.8, tamano: 1.5 },  // Flor arriba izquierda
-    { x: 1.5, y: 5.2, z: 0.8, tamano: 1.6 },  // Flor arriba derecha
-    { x: 0, y: 6.2, z: 0, tamano: 1.4 },      // Flor superior
-    { x: -3.5, y: 1.8, z: -0.5, tamano: 1.4 }, // Flor lateral izquierda
-    { x: 3.5, y: 2, z: 0.5, tamano: 1.5 }     // Flor lateral derecha
+// HOJA: forma de elipse alargada verde
+function generarHoja(baseX, baseY, baseZ, tamano, angulo, curvatura) {
+    const t = Math.random();
+    
+    // Hoja: elipse alargada
+    const largoHoja = tamano * 2.5;
+    const anchoHoja = tamano * 0.8;
+    
+    // Coordenadas locales
+    const localX = (t - 0.5) * largoHoja;
+    const localY = (Math.random() - 0.5) * anchoHoja * Math.sin(t * Math.PI); // Se estrecha en los extremos
+    
+    // Curvatura de la hoja
+    const curvaY = Math.sin(t * Math.PI) * curvatura;
+    
+    // Rotar según ángulo
+    const x = baseX + Math.cos(angulo) * localX - Math.sin(angulo) * localY;
+    const y = baseY + Math.sin(angulo) * localX + Math.cos(angulo) * localY + curvaY;
+    const z = baseZ + (Math.random() - 0.5) * tamano * 0.3;
+    
+    // Verde con degradado (más oscuro en el centro, más claro en los bordes)
+    const intensidad = Math.sin(t * Math.PI); // 0 en los extremos, 1 en el centro
+    color.setHSL(
+        0.3 + Math.random() * 0.05,
+        0.7 + Math.random() * 0.3,
+        0.15 + intensidad * 0.2 + Math.random() * 0.1
+    );
+    
+    return [x, y, z, color];
+}
+
+// TALLO: línea curva verde
+function generarTallo(desdeX, desdeY, desdeZ, hastaX, hastaY, hastaZ) {
+    const t = Math.random();
+    
+    // Interpolación con curvatura
+    const curvaX = Math.sin(t * Math.PI) * 0.5;
+    const curvaZ = Math.cos(t * Math.PI) * 0.3;
+    
+    const x = desdeX + (hastaX - desdeX) * t + curvaX * 0.5;
+    const y = desdeY + (hastaY - desdeY) * t;
+    const z = desdeZ + (hastaZ - desdeZ) * t + curvaZ * 0.5;
+    
+    // Verde oscuro del tallo
+    color.setHSL(
+        0.28 + Math.random() * 0.05,
+        0.6 + Math.random() * 0.3,
+        0.12 + Math.random() * 0.15
+    );
+    
+    return [x, y, z, color];
+}
+
+// --- POSICIONES DE LAS FLORES (como en la imagen) ---
+// Grupo izquierdo (5 flores)
+const floresIzquierda = [
+    { x: -3.5, y: 2.5, z: 0, tamano: 1.6, petalos: 5 },  // Flor principal izquierda
+    { x: -5, y: 1.2, z: 0.3, tamano: 1.3, petalos: 5 },   // Flor abajo izquierda
+    { x: -4.5, y: 3.8, z: -0.3, tamano: 1.4, petalos: 5 },// Flor arriba izquierda
+    { x: -2.2, y: 3.8, z: 0.4, tamano: 1.3, petalos: 5 }, // Flor arriba derecha
+    { x: -3.2, y: 0.8, z: -0.4, tamano: 1.2, petalos: 5 } // Flor abajo centro
 ];
 
-// Distribuir partículas entre tallos, hojas y flores
+// Grupo derecho (4 flores)
+const floresDerecha = [
+    { x: 3, y: 2.8, z: 0, tamano: 1.5, petalos: 5 },      // Flor principal derecha
+    { x: 4.8, y: 2, z: 0.3, tamano: 1.3, petalos: 5 },    // Flor arriba derecha
+    { x: 3.5, y: 1.2, z: -0.3, tamano: 1.4, petalos: 5 }, // Flor abajo derecha
+    { x: 5.2, y: 3.5, z: -0.2, tamano: 1.2, petalos: 5 }  // Flor arriba extrema
+];
+
+const todasLasFlores = [...floresIzquierda, ...floresDerecha];
+
+// --- DISTRIBUCIÓN DE PARTÍCULAS ---
 let index = 0;
 while (index < particleCount) {
     const tipo = Math.random();
     let targetX, targetY, targetZ;
-    let colorHue, colorSat, colorLight;
-    let size;
+    let partColor;
     
-    if (tipo < 0.30) {
-        // TALLOS (30%)
-        // Cada tallo va desde la base hasta una flor
-        const florIdx = Math.floor(Math.random() * flores.length);
-        const flor = flores[florIdx];
-        
-        // Altura base del ramo
-        const alturaBase = -6;
-        const t = Math.random();
-        const y = alturaBase + t * (flor.y - alturaBase);
-        
-        // El tallo se curva ligeramente hacia la flor
-        const progreso = t;
-        const x = flor.x * progreso * 0.8 + (Math.random() - 0.5) * 0.15;
-        const z = flor.z * progreso * 0.8 + (Math.random() - 0.5) * 0.15;
-        
-        targetX = x;
-        targetY = y;
-        targetZ = z;
-        
-        // Color verde del tallo (variaciones)
-        colorHue = 0.25 + Math.random() * 0.1;
-        colorSat = 0.5 + Math.random() * 0.4;
-        colorLight = 0.15 + Math.random() * 0.25;
-        size = 0.15 + Math.random() * 0.15;
-        
-    } else if (tipo < 0.45) {
-        // HOJAS (15%)
-        const florIdx = Math.floor(Math.random() * flores.length);
-        const flor = flores[florIdx];
-        
-        // Las hojas van en la parte media del tallo
-        const t = 0.3 + Math.random() * 0.4;
-        const y = -6 + t * (flor.y - (-6));
-        const x = flor.x * t * 0.8;
-        const z = flor.z * t * 0.8;
-        
-        const lado = Math.random() < 0.5 ? -1 : 1;
-        const tamañoHoja = 0.4 + Math.random() * 0.3;
-        
-        targetX = x + lado * (0.3 + Math.random() * 0.5);
-        targetY = y + (Math.random() - 0.5) * 0.3;
-        targetZ = z + (Math.random() - 0.5) * 0.4;
-        
-        // Verde más claro para las hojas
-        colorHue = 0.28 + Math.random() * 0.08;
-        colorSat = 0.6 + Math.random() * 0.3;
-        colorLight = 0.2 + Math.random() * 0.3;
-        size = 0.2 + Math.random() * 0.2;
-        
-    } else {
+    if (tipo < 0.55) {
         // FLORES (55%)
-        const florIdx = Math.floor(Math.random() * flores.length);
-        const flor = flores[florIdx];
-        
-        const [fx, fy, fz, parte] = generarFlor(flor.x, flor.y, flor.z, flor.tamano);
-        
+        const flor = todasLasFlores[Math.floor(Math.random() * todasLasFlores.length)];
+        const [fx, fy, fz, c] = generarFlor(flor.x, flor.y, flor.z, flor.tamano, flor.petalos);
         targetX = fx;
         targetY = fy;
         targetZ = fz;
+        partColor = c;
         
-        if (parte === 'centro') {
-            // Centro de la flor: marrón oscuro
-            colorHue = 0.08;
-            colorSat = 0.7;
-            colorLight = 0.1 + Math.random() * 0.15;
-            size = 0.15 + Math.random() * 0.15;
+    } else if (tipo < 0.75) {
+        // HOJAS (20%)
+        // Hojas grandes que salen de los tallos
+        const hojaTipo = Math.floor(Math.random() * 6);
+        const hojas = [
+            // Hoja izquierda superior (grande)
+            () => generarHoja(-4, 1, 0, 1.2, Math.PI * 0.7, 0.5),
+            // Hoja izquierda inferior
+            () => generarHoja(-4.5, 0, 0, 1.0, Math.PI * 0.8, -0.3),
+            // Hoja derecha superior
+            () => generarHoja(3.5, 1.5, 0, 1.1, Math.PI * 0.3, 0.4),
+            // Hoja derecha inferior
+            () => generarHoja(4, 0.5, 0, 0.9, Math.PI * 0.2, -0.4),
+            // Hoja central izquierda
+            () => generarHoja(-2.5, 0.5, 0, 0.8, Math.PI * 0.75, 0.3),
+            // Hoja central derecha
+            () => generarHoja(2.5, 0.8, 0, 0.85, Math.PI * 0.25, -0.3)
+        ];
+        const [hx, hy, hz, c] = hojas[hojaTipo]();
+        targetX = hx;
+        targetY = hy;
+        targetZ = hz;
+        partColor = c;
+        
+    } else {
+        // TALLOS (25%)
+        // Tallos que conectan las flores
+        const talloTipo = Math.floor(Math.random() * 6);
+        let desde, hasta;
+        
+        if (talloTipo === 0) {
+            desde = { x: -2, y: -5, z: 0 };
+            hasta = { x: -3.5, y: 2.5, z: 0 };
+        } else if (talloTipo === 1) {
+            desde = { x: -2, y: -5, z: 0 };
+            hasta = { x: -5, y: 1.2, z: 0 };
+        } else if (talloTipo === 2) {
+            desde = { x: -2, y: -5, z: 0 };
+            hasta = { x: -4.5, y: 3.8, z: 0 };
+        } else if (talloTipo === 3) {
+            desde = { x: 2, y: -5, z: 0 };
+            hasta = { x: 3, y: 2.8, z: 0 };
+        } else if (talloTipo === 4) {
+            desde = { x: 2, y: -5, z: 0 };
+            hasta = { x: 4.8, y: 2, z: 0 };
         } else {
-            // Pétalos: AMARILLO (diferentes tonos)
-            const variacion = Math.random();
-            if (variacion < 0.3) {
-                // Amarillo brillante
-                colorHue = 0.13;
-                colorSat = 1.0;
-                colorLight = 0.5 + Math.random() * 0.3;
-            } else if (variacion < 0.7) {
-                // Amarillo dorado
-                colorHue = 0.11;
-                colorSat = 0.9;
-                colorLight = 0.4 + Math.random() * 0.3;
-            } else {
-                // Amarillo claro
-                colorHue = 0.15;
-                colorSat = 0.8;
-                colorLight = 0.6 + Math.random() * 0.3;
-            }
-            size = 0.2 + Math.random() * 0.25;
+            desde = { x: 2, y: -5, z: 0 };
+            hasta = { x: 5.2, y: 3.5, z: 0 };
         }
+        
+        const [tx, ty, tz, c] = generarTallo(desde.x, desde.y, desde.z, hasta.x, hasta.y, hasta.z);
+        targetX = tx;
+        targetY = ty;
+        targetZ = tz;
+        partColor = c;
     }
     
     targetPositions[index * 3] = targetX;
@@ -224,11 +262,9 @@ while (index < particleCount) {
     positions[index * 3 + 1] = startY;
     positions[index * 3 + 2] = startZ;
 
-    color.setHSL(colorHue, colorSat, colorLight);
-    colors[index * 3] = color.r;
-    colors[index * 3 + 1] = color.g;
-    colors[index * 3 + 2] = color.b;
-    sizes[index] = size;
+    colors[index * 3] = partColor.r;
+    colors[index * 3 + 1] = partColor.g;
+    colors[index * 3 + 2] = partColor.b;
 
     index++;
 }
@@ -243,14 +279,14 @@ canvas.height = 64;
 const ctx = canvas.getContext('2d');
 const gradient = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
 gradient.addColorStop(0, 'rgba(255,255,255,1)');
-gradient.addColorStop(0.3, 'rgba(255,240,180,0.9)');
+gradient.addColorStop(0.4, 'rgba(200,230,255,0.9)');
 gradient.addColorStop(1, 'rgba(0,0,0,0)');
 ctx.fillStyle = gradient;
 ctx.fillRect(0, 0, 64, 64);
 const texture = new THREE.CanvasTexture(canvas);
 
 const material = new THREE.PointsMaterial({
-    size: 0.3,
+    size: 0.25,
     vertexColors: true,
     map: texture,
     blending: THREE.AdditiveBlending,
@@ -263,8 +299,8 @@ const material = new THREE.PointsMaterial({
 const ramo = new THREE.Points(geometry, material);
 scene.add(ramo);
 
-// --- PARTÍCULAS DE POLEN (flotando alrededor del ramo) ---
-const polenCount = 400;
+// --- PARTÍCULAS DE POLEN DORADO ---
+const polenCount = 300;
 const polenGeo = new THREE.BufferGeometry();
 const polenPos = new Float32Array(polenCount * 3);
 const polenVel = new Float32Array(polenCount * 3);
@@ -272,19 +308,18 @@ const polenColors = new Float32Array(polenCount * 3);
 
 for (let i = 0; i < polenCount; i++) {
     const angulo = Math.random() * Math.PI * 2;
-    const radio = 2 + Math.random() * 8;
-    const altura = (Math.random() - 0.5) * 12;
+    const radio = 3 + Math.random() * 8;
     
     polenPos[i * 3] = Math.cos(angulo) * radio;
-    polenPos[i * 3 + 1] = altura;
+    polenPos[i * 3 + 1] = (Math.random() - 0.5) * 12;
     polenPos[i * 3 + 2] = Math.sin(angulo) * radio;
     
     polenVel[i * 3] = (Math.random() - 0.5) * 0.01;
     polenVel[i * 3 + 1] = 0.003 + Math.random() * 0.008;
     polenVel[i * 3 + 2] = (Math.random() - 0.5) * 0.01;
     
-    // Polen: dorado brillante
-    color.setHSL(0.12, 0.9, 0.5 + Math.random() * 0.4);
+    // Polen dorado
+    color.setHSL(0.13, 0.9, 0.5 + Math.random() * 0.4);
     polenColors[i * 3] = color.r;
     polenColors[i * 3 + 1] = color.g;
     polenColors[i * 3 + 2] = color.b;
@@ -294,7 +329,7 @@ polenGeo.setAttribute('position', new THREE.BufferAttribute(polenPos, 3));
 polenGeo.setAttribute('color', new THREE.BufferAttribute(polenColors, 3));
 
 const polenMat = new THREE.PointsMaterial({
-    size: 0.12,
+    size: 0.1,
     vertexColors: true,
     transparent: true,
     opacity: 0,
@@ -306,8 +341,8 @@ const polenMat = new THREE.PointsMaterial({
 const polen = new THREE.Points(polenGeo, polenMat);
 scene.add(polen);
 
-// --- LUCIÉRNAGAS (puntos brillantes que flotan) ---
-const luciernagaCount = 60;
+// --- LUCIÉRNAGAS ---
+const luciernagaCount = 50;
 const luciernagaGeo = new THREE.BufferGeometry();
 const luciernagaPos = new Float32Array(luciernagaCount * 3);
 const luciernagaVel = new Float32Array(luciernagaCount * 3);
@@ -315,10 +350,10 @@ const luciernagaFase = new Float32Array(luciernagaCount);
 
 for (let i = 0; i < luciernagaCount; i++) {
     const angulo = Math.random() * Math.PI * 2;
-    const radio = 5 + Math.random() * 10;
+    const radio = 6 + Math.random() * 10;
     
     luciernagaPos[i * 3] = Math.cos(angulo) * radio;
-    luciernagaPos[i * 3 + 1] = (Math.random() - 0.5) * 15;
+    luciernagaPos[i * 3 + 1] = (Math.random() - 0.5) * 12;
     luciernagaPos[i * 3 + 2] = Math.sin(angulo) * radio;
     
     luciernagaVel[i * 3] = (Math.random() - 0.5) * 0.02;
@@ -331,8 +366,8 @@ for (let i = 0; i < luciernagaCount; i++) {
 luciernagaGeo.setAttribute('position', new THREE.BufferAttribute(luciernagaPos, 3));
 
 const luciernagaMat = new THREE.PointsMaterial({
-    size: 0.3,
-    color: 0xffdd44,
+    size: 0.25,
+    color: 0xaaddff, // Azul claro (como las flores)
     transparent: true,
     opacity: 0,
     blending: THREE.AdditiveBlending,
@@ -358,10 +393,11 @@ for (let i = 0; i < bgCount; i++) {
     bgPos[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
     bgPos[i * 3 + 2] = r * Math.cos(phi);
     
+    // Estrellas azuladas/blancas (como las flores)
     const brightness = 0.08 + Math.random() * 0.25;
-    bgColors[i * 3] = brightness;
+    bgColors[i * 3] = brightness * 0.7;
     bgColors[i * 3 + 1] = brightness * 0.9;
-    bgColors[i * 3 + 2] = brightness * 0.5;
+    bgColors[i * 3 + 2] = brightness;
 }
 
 bgGeo.setAttribute('position', new THREE.BufferAttribute(bgPos, 3));
@@ -390,14 +426,14 @@ function animate() {
     controls.update();
     time += 0.01;
 
-    // Balanceo suave del ramo (como si lo mecara el viento)
-    ramo.rotation.z = Math.sin(time * 0.5) * 0.03;
-    ramo.rotation.y += 0.0015;
-    ramo.rotation.x = Math.sin(time * 0.3) * 0.02;
+    // Balanceo suave del ramo
+    ramo.rotation.z = Math.sin(time * 0.4) * 0.04;
+    ramo.rotation.y += 0.001;
+    ramo.rotation.x = Math.sin(time * 0.25) * 0.02;
     
     bgStars.rotation.y += 0.0001;
 
-    // --- POLEN FLOTANDO ---
+    // --- POLEN ---
     if (animationProgress > 0.4) {
         polenMat.opacity = Math.min((animationProgress - 0.4) * 3, 0.7);
         
@@ -407,10 +443,9 @@ function animate() {
             polenPosAttr[i * 3 + 1] += polenVel[i * 3 + 1];
             polenPosAttr[i * 3 + 2] += polenVel[i * 3 + 2] + Math.cos(time + i) * 0.002;
             
-            // Reiniciar si sube demasiado
             if (polenPosAttr[i * 3 + 1] > 12) {
                 const angulo = Math.random() * Math.PI * 2;
-                const radio = 2 + Math.random() * 8;
+                const radio = 3 + Math.random() * 8;
                 polenPosAttr[i * 3] = Math.cos(angulo) * radio;
                 polenPosAttr[i * 3 + 1] = -8 - Math.random() * 2;
                 polenPosAttr[i * 3 + 2] = Math.sin(angulo) * radio;
@@ -421,7 +456,7 @@ function animate() {
 
     // --- LUCIÉRNAGAS ---
     if (animationProgress > 0.6) {
-        luciernagaMat.opacity = Math.min((animationProgress - 0.6) * 3, 0.9);
+        luciernagaMat.opacity = Math.min((animationProgress - 0.6) * 3, 0.8);
         
         const lucPos = luciernagaGeo.attributes.position.array;
         for (let i = 0; i < luciernagaCount; i++) {
@@ -429,7 +464,6 @@ function animate() {
             lucPos[i * 3 + 1] += luciernagaVel[i * 3 + 1] + Math.cos(time * 1.5 + luciernagaFase[i]) * 0.01;
             lucPos[i * 3 + 2] += luciernagaVel[i * 3 + 2] + Math.sin(time * 1.8 + luciernagaFase[i]) * 0.01;
             
-            // Mantener cerca del ramo
             const dist = Math.sqrt(lucPos[i*3]*lucPos[i*3] + lucPos[i*3+2]*lucPos[i*3+2]);
             if (dist > 15) {
                 luciernagaVel[i * 3] *= -1;
@@ -440,9 +474,7 @@ function animate() {
             }
         }
         luciernagaGeo.attributes.position.needsUpdate = true;
-        
-        // Parpadeo de luciérnagas
-        luciernagaMat.size = 0.3 + Math.sin(time * 3) * 0.1;
+        luciernagaMat.size = 0.25 + Math.sin(time * 3) * 0.08;
     }
 
     // --- ANIMACIÓN DE FORMACIÓN ---
